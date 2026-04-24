@@ -105,6 +105,15 @@ void Renderer::render(const game::World& world, platform::Terminal& terminal) {
     drawEntity(frame, ax + 1, ay, '-');
   }
 
+  if (world.playerFireActive()) {
+    const int fy = static_cast<int>(std::floor(world.playerFireY())) + 1;
+    const int fx_start = static_cast<int>(std::floor(world.playerFireX())) - camera_x;
+    const int fx_end = static_cast<int>(std::floor(world.playerFireX() + world.playerFireW())) - camera_x;
+    for (int fx = fx_start; fx < fx_end; ++fx) {
+      drawEntity(frame, fx, fy, '~');
+    }
+  }
+
   const std::vector<game::Monster>& monsters = world.monsters();
   for (std::size_t i = 0; i < monsters.size(); ++i) {
     const game::Monster& m = monsters[i];
@@ -116,7 +125,7 @@ void Renderer::render(const game::World& world, platform::Terminal& terminal) {
     drawEntity(frame, mx, my, 'm');
   }
 
-  frame.push_back(fitLine("A/D move  W jump  J attack  Q quit", width));
+  frame.push_back(fitLine("A/D move  W jump  J attack  F fire-breath  Q quit", width));
   terminal.present(frame);
 }
 
