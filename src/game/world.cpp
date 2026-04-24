@@ -211,9 +211,13 @@ void World::resolveCombat() {
 
     if (m.touch_cooldown <= 0.0f && player_.invuln_timer <= 0.0f &&
         intersects(player_.x, player_.y, player_.width, player_.height, m.x, m.y, m.width, m.height)) {
-      m.touch_cooldown = 0.4f;
-      player_.invuln_timer = 0.9f;
+      m.touch_cooldown = 0.5f;
+      player_.invuln_timer = 1.2f;
       player_.hp -= 1;
+      // Knockback: push player away from monster with upward kick
+      const float kKnockbackSpeed = 9.0f;
+      player_.vx = (player_.x >= m.x ? 1.0f : -1.0f) * kKnockbackSpeed;
+      player_.vy = -7.0f;
     }
   }
 }
