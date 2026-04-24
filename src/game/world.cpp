@@ -37,7 +37,12 @@ World::World()
       attack_y_(0.0f),
       attack_w_(0.0f),
       attack_h_(0.0f),
-      attack_active_this_frame_(false) {
+      attack_active_this_frame_(false),
+      fire_x_(0.0f),
+      fire_y_(0.0f),
+      fire_w_(0.0f),
+      fire_h_(0.0f),
+      fire_active_this_frame_(false) {
   reset();
 }
 
@@ -50,6 +55,7 @@ void World::reset() {
   state_ = GameState::Running;
   input_ = engine::InputState();
   attack_active_this_frame_ = false;
+  fire_active_this_frame_ = false;
 
   for (int y = 0; y < static_cast<int>(map_.size()); ++y) {
     for (int x = 0; x < static_cast<int>(map_[y].size()); ++x) {
@@ -74,6 +80,7 @@ void World::handleInput(const engine::InputState& input) {
 
 void World::update(float dt) {
   attack_active_this_frame_ = false;
+  fire_active_this_frame_ = false;
 
   if (state_ != GameState::Running) {
     return;
@@ -142,6 +149,28 @@ void World::updatePlayer(float dt) {
     attack_x_ = player_.facing_right ? player_.x + player_.width : player_.x - attack_w_;
   }
 
+  // Fire-breath skill: shoots a horizontal flame that instantly kills all
+  // monsters in a straight line up to 10 tiles in the facing direction.
+  constexpr float kFireRange = 10.0f;
+  constexpr float kFireCooldown = 2.5f;
+  constexpr float kFireDuration = 0.20f;
+  if (player_.fire_cooldown > 0.0f) {
+    player_.fire_cooldown = std::max(0.0f, player_.fire_cooldown - dt);
+  }
+  if (player_.fire_timer > 0.0f) {
+    player_.fire_timer = std::max(0.0f, player_.fire_timer - dt);
+  }
+  if (input_.fire && player_.fire_cooldown <= 0.0f) {
+    player_.fire_cooldown = kFireCooldown;
+    player_.fire_timer = kFireDuration;
+    fire_active_this_frame_ = true;
+
+    fire_w_ = kFireRange;
+    fire_h_ = player_.height;
+    fire_y_ = player_.y;
+    fire_x_ = player_.facing_right ? player_.x + player_.width : player_.x - kFireRange;
+  }
+
   player_.vy = std::min(kMaxFallSpeed, player_.vy + kGravity * dt);
 
   moveWithCollisions(player_.x,
@@ -199,6 +228,20 @@ void World::resolveCombat() {
           m.alive = false;
           ++kills_;
         }
+      }
+    }
+  }
+
+  // Fire-breath: instantly kills every monster inside the flame line.
+  if (fire_active_this_frame_) {
+    for (std::size_t i = 0; i < monsters_.size(); ++i) {
+      Monster& m = monsters_[i];
+      if (!m.alive) {
+        continue;
+      }
+      if (intersects(fire_x_, fire_y_, fire_w_, fire_h_, m.x, m.y, m.width, m.height)) {
+        m.alive = false;
+        ++kills_;
       }
     }
   }
@@ -276,6 +319,26 @@ float World::playerAttackW() const {
 
 float World::playerAttackH() const {
   return attack_h_;
+}
+
+bool World::playerFireActive() const {
+  return player_.fire_timer > 0.0f;
+}
+
+float World::playerFireX() const {
+  return fire_x_;
+}
+
+float World::playerFireY() const {
+  return fire_y_;
+}
+
+float World::playerFireW() const {
+  return fire_w_;
+}
+
+float World::playerFireH() const {
+  return fire_h_;
 }
 
 std::string World::buildHudText() const {

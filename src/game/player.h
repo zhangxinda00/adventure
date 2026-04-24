@@ -17,6 +17,10 @@ struct Player {
   float attack_cooldown = 0.0f;
   float attack_timer = 0.0f;
   float invuln_timer = 0.0f;
+
+  // Fire-breath skill: available from the start, key F
+  float fire_cooldown = 0.0f;
+  float fire_timer = 0.0f;
 };
 
 }  // namespace game

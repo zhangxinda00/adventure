@@ -111,6 +111,8 @@ engine::InputState Terminal::pollInput() {
         input.jump = true;
       } else if (ch == 'j' || ch == 'J') {
         input.attack = true;
+      } else if (ch == 'f' || ch == 'F') {
+        input.fire = true;
       } else if (ch == 'q' || ch == 'Q') {
         input.quit = true;
       } else if (ch == 'r' || ch == 'R') {

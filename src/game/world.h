@@ -37,6 +37,12 @@ class World {
   float playerAttackW() const;
   float playerAttackH() const;
 
+  bool playerFireActive() const;
+  float playerFireX() const;
+  float playerFireY() const;
+  float playerFireW() const;
+  float playerFireH() const;
+
   std::string buildHudText() const;
 
  private:
@@ -58,6 +64,12 @@ class World {
   float attack_w_;
   float attack_h_;
   bool attack_active_this_frame_;
+
+  float fire_x_;
+  float fire_y_;
+  float fire_w_;
+  float fire_h_;
+  bool fire_active_this_frame_;
 };
 
 }  // namespace game
